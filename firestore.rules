@@ -1,0 +1,50 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Safety net: Deny all by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Global Helpers ---
+    function isSignedIn() { return request.auth != null; }
+    function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function isCreator() { return isVerified() && request.auth.token.email == 'ahoretjeancyrille777@gmail.com'; }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+
+    // --- Access Codes Security ---
+    match /access_codes/{codeId} {
+      function isValidAccessCode(data) {
+        return data.code is string && data.code.size() >= 5 && data.code.size() <= 15
+          && data.createdAt is int
+          && data.expiresAt is int
+          && data.isUsed is bool
+          && (data.usedByDeviceId == null || data.usedByDeviceId is string);
+      }
+
+      // Read/Write access (Restriction removed per user request to bypass email login)
+      allow read, write: if true; 
+    }
+
+    // --- Evaluations Security ---
+    match /evaluations/{evaluationId} {
+      function isValidEvaluation(data) {
+        return data.mode is string && data.grade is string 
+          && data.subject is string && data.content is string
+          && data.timestamp is int && data.role is string;
+      }
+
+      // Allow read/create for everyone (Restriction removed per user request)
+      allow read, create: if true;
+    }
+
+    // --- Admin WhiteList ---
+    match /admins/{adminId} {
+      allow read: if isVerified();
+    }
+  }
+}
