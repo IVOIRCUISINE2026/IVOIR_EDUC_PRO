@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Key, Loader2, ShieldAlert, GraduationCap, CheckCircle2 } from 'lucide-react';
+import { Key, Loader2, ShieldAlert, GraduationCap, CheckCircle2, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { db } from '../lib/firebase';
@@ -12,7 +12,7 @@ interface CodeVerificationProps {
   onOpenPremium?: () => void;
 }
 
-export default function CodeVerification({ onVerified, deviceId }: CodeVerificationProps) {
+export default function CodeVerification({ onVerified, deviceId, onOpenPremium }: CodeVerificationProps) {
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -160,6 +160,29 @@ export default function CodeVerification({ onVerified, deviceId }: CodeVerificat
               <ShieldAlert className="w-4 h-4 shrink-0" />
               {error}
             </motion.div>
+          )}
+
+          {onOpenPremium && (
+            <div className="pt-2 max-w-md mx-auto">
+              <button
+                type="button"
+                onClick={onOpenPremium}
+                className="w-full p-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-white font-bold shadow-lg shadow-orange-200 transition-all flex items-center justify-between group cursor-pointer border border-amber-300/30"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white/20 rounded-xl shrink-0">
+                    <Crown className="w-5 h-5 text-yellow-200" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xs font-black uppercase text-yellow-100">Option Premium (Abonnement 12 Mois)</p>
+                    <p className="text-[10px] text-white/90 font-medium">Générer ou Acheter un Code (3000 FCFA / An)</p>
+                  </div>
+                </div>
+                <span className="bg-white text-orange-600 font-black text-[10px] px-3 py-1 rounded-xl shadow-xs">
+                  3 000 F
+                </span>
+              </button>
+            </div>
           )}
         </div>
 

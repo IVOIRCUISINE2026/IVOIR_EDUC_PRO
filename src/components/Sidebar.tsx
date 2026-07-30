@@ -59,6 +59,8 @@ interface SidebarProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   userRole: UserRole;
+  onOpenPremium?: () => void;
+  isPremium?: boolean;
 }
 
 const grades = ["CM2", "6ème", "5ème", "4ème", "3ème", "2nde A", "2nde C", "1ère A", "1ère C", "1ère D", "Tle A", "Tle C", "Tle D"];
@@ -102,7 +104,9 @@ export default function Sidebar({
   onReset,
   isOpen,
   setIsOpen,
-  userRole
+  userRole,
+  onOpenPremium,
+  isPremium = false
 }: SidebarProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [subjectSearch, setSubjectSearch] = useState("");
@@ -194,6 +198,32 @@ export default function Sidebar({
 
         <ScrollArea className="flex-1 min-h-0">
           <div className="space-y-6 px-6 pb-8">
+            {/* Option Premium Card */}
+            {onOpenPremium && (
+              <button
+                type="button"
+                onClick={onOpenPremium}
+                className="w-full p-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-white font-bold shadow-md shadow-orange-200 transition-all flex items-center justify-between group text-left cursor-pointer border border-amber-300/30"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="p-1.5 bg-white/20 rounded-xl shrink-0">
+                    <Crown className="w-5 h-5 text-yellow-200 animate-bounce" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-black tracking-tight leading-none text-yellow-100 uppercase">
+                      {isPremium ? "Option Premium" : "Option Premium"}
+                    </p>
+                    <p className="text-[10px] font-medium text-white/90 truncate mt-1">
+                      Codes 12 Mois & Mobile Money
+                    </p>
+                  </div>
+                </div>
+                <Badge className="bg-white text-orange-600 hover:bg-white text-[9px] font-black shrink-0 px-2 py-0.5 rounded-lg shadow-xs">
+                  {isPremium ? "ACTIF" : "3 000 F"}
+                </Badge>
+              </button>
+            )}
+
             {/* Niveau Scolaire */}
             <div className="space-y-2">
               <label className="text-[11px] font-bold text-orange-500 uppercase tracking-widest px-2">Niveau Scolaire</label>

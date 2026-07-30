@@ -9,6 +9,7 @@ import { Loader2 } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import MainContent from './components/MainContent';
 import CodeVerification from './components/CodeVerification';
+import PremiumModal from './components/PremiumModal';
 import { LearningMode, UserRole } from './types';
 import { db } from './lib/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
@@ -43,9 +44,24 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
   
-  // Access Verification States
+  // Access Verification & Premium States
   const [isCodeVerified, setIsCodeVerified] = useState<boolean>(true);
   const [isCheckingCode, setIsCheckingCode] = useState<boolean>(false);
+  const [showPremiumModal, setShowPremiumModal] = useState<boolean>(false);
+  const [isPremium, setIsPremium] = useState<boolean>(() => {
+    return localStorage.getItem('ivoireduc_is_premium') === 'true';
+  });
+
+  // Auto-open premium modal if direct link with ?subscribe=premium or ?premium=true is used
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.includes('?') ? window.location.hash.split('?')[1] : "");
+    const sub = queryParams.get('subscribe') || hashParams.get('subscribe');
+    const prem = queryParams.get('premium') || hashParams.get('premium');
+    if (sub === 'premium' || prem === 'true' || sub === '3000') {
+      setShowPremiumModal(true);
+    }
+  }, []);
 
   // Device ID generation/retrieval
   const [deviceId] = useState(() => {
@@ -82,13 +98,26 @@ export default function App() {
 
   if (!isCodeVerified || !isLoggedIn) {
     return (
-      <CodeVerification 
-        deviceId={deviceId} 
-        onVerified={() => {
-          setIsCodeVerified(true);
-          setIsLoggedIn(true);
-        }} 
-      />
+      <>
+        <CodeVerification 
+          deviceId={deviceId} 
+          onVerified={() => {
+            setIsCodeVerified(true);
+            setIsLoggedIn(true);
+          }} 
+          onOpenPremium={() => setShowPremiumModal(true)}
+        />
+        <PremiumModal
+          isOpen={showPremiumModal}
+          onClose={() => setShowPremiumModal(false)}
+          deviceId={deviceId}
+          onActivated={(code) => {
+            setIsPremium(true);
+            setIsCodeVerified(true);
+            setIsLoggedIn(true);
+          }}
+        />
+      </>
     );
   }
 
@@ -106,6 +135,8 @@ export default function App() {
         isOpen={isSidebarOpen}
         setIsOpen={setIsSidebarOpen}
         userRole={userRole}
+        onOpenPremium={() => setShowPremiumModal(true)}
+        isPremium={isPremium}
       />
       
       <main className="flex-1 flex flex-col lg:ml-72 h-full">
@@ -118,8 +149,20 @@ export default function App() {
           onReset={resetApp}
           setIsSidebarOpen={setIsSidebarOpen}
           userRole={userRole}
+          onOpenPremium={() => setShowPremiumModal(true)}
+          isPremium={isPremium}
         />
       </main>
+
+      <PremiumModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+        deviceId={deviceId}
+        onActivated={(code) => {
+          setIsPremium(true);
+          setIsCodeVerified(true);
+        }}
+      />
     </div>
   );
 }

@@ -32,9 +32,11 @@ interface MainContentProps {
   onReset: () => void;
   setIsSidebarOpen: (open: boolean) => void;
   userRole: UserRole;
+  onOpenPremium?: () => void;
+  isPremium?: boolean;
 }
 
-export default function MainContent({ selectedGrade, selectedSubject, selectedMode, setSelectedMode, onLogout, onReset, setIsSidebarOpen, userRole }: MainContentProps) {
+export default function MainContent({ selectedGrade, selectedSubject, selectedMode, setSelectedMode, onLogout, onReset, setIsSidebarOpen, userRole, onOpenPremium, isPremium = false }: MainContentProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -804,6 +806,7 @@ export default function MainContent({ selectedGrade, selectedSubject, selectedMo
       const currentOrigin = window.location.origin + window.location.pathname;
       const apprenticeUrl = `${currentOrigin}?role=apprenant`;
       const adminUrl = `${currentOrigin}?role=administrateur`;
+      const premiumUrl = `${currentOrigin}?role=apprenant&subscribe=premium`;
 
       const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
@@ -835,6 +838,37 @@ export default function MainContent({ selectedGrade, selectedSubject, selectedMo
                 <p className="text-slate-600 max-w-lg leading-relaxed text-sm">
                   Passionné par l'éducation et la technologie, j'ai conçu IvoirEduc Pro pour offrir à chaque élève ivoirien un compagnon d'étude intelligent, conforme au programme national et accessible partout.
                 </p>
+
+                {onOpenPremium && (
+                  <div className="w-full max-w-lg space-y-3">
+                    <div className="p-5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-xl shadow-orange-200 border border-amber-300/30 flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 bg-white/20 rounded-2xl shrink-0">
+                          <Crown className="w-7 h-7 text-yellow-200" />
+                        </div>
+                        <div className="text-left min-w-0">
+                          <h3 className="font-black text-sm uppercase text-yellow-100 truncate">Option Premium (Codes 12 Mois)</h3>
+                          <p className="text-xs text-white/90 truncate">3 000 FCFA / An • Mobile Money & Générateur</p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={onOpenPremium}
+                        className="bg-white text-orange-600 hover:bg-yellow-100 font-black rounded-xl text-xs px-4 h-10 shrink-0 shadow-md"
+                      >
+                        {isPremium ? "Mon Profil" : "Option Premium"}
+                      </Button>
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      onClick={() => copyToClipboard(premiumUrl)}
+                      className="w-full h-11 rounded-xl border-dashed border-amber-400 bg-amber-50/50 hover:bg-amber-100 text-amber-800 font-bold text-xs gap-2"
+                    >
+                      <Copy className="w-4 h-4 text-amber-600" />
+                      Copier le Lien Direct d'Accès Option Premium
+                    </Button>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
                   <a 
@@ -893,7 +927,7 @@ export default function MainContent({ selectedGrade, selectedSubject, selectedMo
 
                 <div className="space-y-6">
                   {/* Deployment Links */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Card className="border-slate-200 shadow-sm p-4 bg-white rounded-2xl border-t-4 border-t-orange-500">
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex flex-col">
@@ -908,6 +942,24 @@ export default function MainContent({ selectedGrade, selectedSubject, selectedMo
                         </Button>
                         <Button variant="outline" className="h-10 w-10 rounded-xl" onClick={() => window.open(apprenticeUrl, '_blank')}>
                           <ExternalLink className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </Card>
+
+                    <Card className="border-slate-200 shadow-sm p-4 bg-white rounded-2xl border-t-4 border-t-amber-500 bg-amber-50/20">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-black text-amber-600 uppercase">Option Premium</span>
+                          <span className="text-sm font-bold text-slate-800">Générateur & Paiement (3000 F)</span>
+                        </div>
+                        <Badge className="bg-amber-500 text-white text-[8px] font-black">12 Mois / Unipersonnel</Badge>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="secondary" className="flex-1 h-10 rounded-xl text-xs gap-2 bg-amber-100 text-amber-900 hover:bg-amber-200" onClick={() => copyToClipboard(premiumUrl)}>
+                          <Copy className="w-3 h-3" /> Copier Lien
+                        </Button>
+                        <Button variant="outline" className="h-10 w-10 rounded-xl border-amber-200" onClick={() => window.open(premiumUrl, '_blank')}>
+                          <ExternalLink className="w-4 h-4 text-amber-600" />
                         </Button>
                       </div>
                     </Card>
