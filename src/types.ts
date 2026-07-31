@@ -1,47 +1,61 @@
-export type UserRole = "apprenant" | "administrateur";
+export type UserRole = 'apprenant' | 'administrateur';
 
 export type LearningMode = 
-  | "Questions Quiz"
-  | "Interrogations et devoirs" 
-  | "Corrections des Évaluations"
-  | "Historique des évaluations" 
-  | "Fiches de révisions" 
-  | "Calcule des moyennes"
-  | "Examens Blancs"
-  | "Cours en vidéo"
-  | "Tableau de Bord"
-  | "Mes Badges"
-  | "Parler à un Conseiller" 
-  | "Historique Conseiller"
-  | "Infos £ Créateur";
+  | 'Quiz'
+  | 'Interrogations et devoirs'
+  | 'Correction des évaluations'
+  | 'Historique des évaluations'
+  | 'Fiches de révisions'
+  | 'Cours en vidéos'
+  | 'Examens blancs'
+  | 'Tableau de bord'
+  | 'Mes badges'
+  | 'Parler à un Conseiller Pédagogique'
+  | 'Historique Conseiller'
+  | 'Calcul de moyennes'
+  | 'Infos concepteur';
+
+export interface SubjectItem {
+  id: string;
+  name: string;
+  iconName: string;
+  flag?: string;
+  color: string;
+  bgColor: string;
+  category: 'litteraire' | 'scientifique' | 'humaine' | 'generale';
+}
 
 export interface ChatMessage {
-  role: "user" | "model";
+  id: string;
+  role: 'user' | 'model';
   text: string;
   timestamp: number;
+  fileName?: string;
+  fileDataUrl?: string;
 }
 
-export interface EvaluationRecord {
+export interface VideoCourse {
   id: string;
-  deviceId: string;
-  mode: LearningMode;
-  grade: string;
+  title: string;
   subject: string;
-  content: string;
-  timestamp: number;
+  grade: string;
+  duration: string;
+  youtubeId: string;
+  thumbnailUrl: string;
+  chapter: string;
 }
 
-export type MobileMoneyOperator = "orange" | "wave" | "mtn" | "moov";
-
-export interface AccessCode {
+export interface StudentBadge {
   id: string;
-  code: string;
-  createdAt: number;
-  expiresAt: number;
-  usedByDeviceId?: string;
-  isUsed: boolean;
-  paymentMethod?: MobileMoneyOperator;
-  phoneNumber?: string;
-  amount?: number;
-  transactionRef?: string;
+  title: string;
+  description: string;
+  icon: string;
+  category: 'streak' | 'quiz' | 'subject' | 'excellence';
+  unlocked: boolean;
+  unlockedAt?: string;
+}
+
+export interface GradeSubjectCoefficient {
+  subject: string;
+  coef: number;
 }

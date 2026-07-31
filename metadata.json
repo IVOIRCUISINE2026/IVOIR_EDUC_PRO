@@ -1,5 +1,6 @@
 {
-  "name": "IvoirEduc Pro",
-  "description": "Assistant pédagogique expert certifié conforme au programme du Ministère de l'Éducation Nationale et de l'Alphabétisation (MENA) de Côte d'Ivoire.",
-  "requestFramePermissions": []
+  "name": "Ivoir'Educ PRO",
+  "description": "Plateforme pédagogique interactive conforme au programme du Ministère de l'Éducation Nationale et de l'Alphabétisation (MENA) de Côte d'Ivoire par Jean Cyrille Ahoret.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
