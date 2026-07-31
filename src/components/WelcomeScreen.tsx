@@ -1,19 +1,48 @@
-import React from 'react';
-import { GraduationCap, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { GraduationCap, ChevronRight, Calendar, Clock } from 'lucide-react';
 
 interface WelcomeScreenProps {
   onEnterApp: () => void;
 }
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnterApp }) => {
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formattedDate = currentTime.toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  const formattedTime = currentTime.toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-orange-50/40 via-white to-emerald-50/20 flex flex-col justify-between items-center p-4 relative overflow-hidden font-sans">
       {/* Decorative side borders matching Ivoirian flag colors */}
       <div className="absolute top-0 left-0 bottom-0 w-2.5 sm:w-3.5 bg-gradient-to-b from-orange-500 via-orange-400 to-orange-600 z-10" />
       <div className="absolute top-0 right-0 bottom-0 w-2.5 sm:w-3.5 bg-gradient-to-b from-emerald-500 via-emerald-600 to-teal-700 z-10" />
 
-      {/* Top spacing */}
-      <div className="w-full pt-6 sm:pt-10" />
+      {/* Top Highlighted Date and Time Banner */}
+      <div className="w-full pt-3 flex justify-center z-20">
+        <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-600 text-white px-4 py-2 rounded-full shadow-lg shadow-orange-500/20 border-2 border-white ring-2 ring-orange-400/40 flex items-center gap-2 text-xs sm:text-sm font-black tracking-wide font-heading uppercase">
+          <span className="w-2 h-2 rounded-full bg-emerald-200 animate-ping shrink-0" />
+          <Calendar className="w-4 h-4 text-amber-200 shrink-0" />
+          <span className="capitalize">{formattedDate}</span>
+          <span className="text-orange-200 font-extrabold">&bull;</span>
+          <Clock className="w-4 h-4 text-amber-200 shrink-0" />
+          <span className="font-mono tracking-wider text-amber-100">{formattedTime}</span>
+        </div>
+      </div>
 
       {/* Center Container matching exact layout in image */}
       <div className="w-full max-w-md mx-auto flex flex-col items-center text-center px-4 space-y-6 sm:space-y-8 my-auto py-4">
