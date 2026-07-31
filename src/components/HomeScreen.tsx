@@ -1,6 +1,7 @@
-import React from 'react';
-import { GraduationCap, BookOpen, Layers, ChevronRight, ShieldCheck, PhoneCall, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { GraduationCap, BookOpen, Layers, ChevronRight, ShieldCheck, PhoneCall, Sparkles, LogOut } from 'lucide-react';
 import { LearningMode } from '../types';
+import { LogoutModal } from './LogoutModal';
 
 interface HomeScreenProps {
   selectedGrade: string;
@@ -11,6 +12,8 @@ interface HomeScreenProps {
   onOpenSubjectSelect: () => void;
   onStartChat: () => void;
   onOpenDesignerInfo: () => void;
+  onLogoutAndSave?: () => void;
+  onLogoutWithoutSave?: () => void;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
@@ -22,7 +25,29 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onOpenSubjectSelect,
   onStartChat,
   onOpenDesignerInfo,
+  onLogoutAndSave,
+  onLogoutWithoutSave,
 }) => {
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const handleSaveAndQuit = () => {
+    if (onLogoutAndSave) {
+      onLogoutAndSave();
+    } else {
+      localStorage.setItem('ivoireduc_last_grade', selectedGrade);
+      localStorage.setItem('ivoireduc_last_subject', selectedSubject);
+      localStorage.setItem('ivoireduc_saved_at', new Date().toISOString());
+    }
+    setShowLogoutModal(false);
+  };
+
+  const handleQuitWithoutSave = () => {
+    if (onLogoutWithoutSave) {
+      onLogoutWithoutSave();
+    }
+    setShowLogoutModal(false);
+  };
+
   return (
     <div className="space-y-4 pb-20 max-w-2xl mx-auto px-4 pt-3">
       {/* Quick Launch Active Configuration Banner if set */}
@@ -123,6 +148,55 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
       </button>
 
+      {/* Special Primary French Modules Card on Home if CM1 or CM2 and Français is active */}
+      {(selectedGrade === 'CM1' || selectedGrade === 'CM2') && selectedSubject === 'Français' && (
+        <div className="bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900 text-white rounded-2xl p-4 shadow-lg border border-emerald-700 space-y-3 animate-in fade-in duration-300">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-orange-400 fill-orange-400" />
+              <h4 className="text-xs font-black uppercase tracking-wider font-heading text-emerald-100">
+                Leçons du Programme MENA ({selectedGrade})
+              </h4>
+            </div>
+            <span className="text-[10px] bg-orange-500/90 text-white font-extrabold px-2 py-0.5 rounded-full font-heading">
+              Français
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <button
+              onClick={onStartChat}
+              className="bg-white/10 hover:bg-white/20 active:scale-[0.98] p-3 rounded-xl border border-white/20 text-left transition-all group cursor-pointer"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg">📖</span>
+                <span className="text-xs font-black text-white font-heading group-hover:text-orange-300 transition-colors">
+                  Exploitation de texte 1
+                </span>
+              </div>
+              <p className="text-[11px] text-emerald-200 font-medium">
+                Vocabulaire et Orthographe
+              </p>
+            </button>
+
+            <button
+              onClick={onStartChat}
+              className="bg-white/10 hover:bg-white/20 active:scale-[0.98] p-3 rounded-xl border border-white/20 text-left transition-all group cursor-pointer"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg">✍️</span>
+                <span className="text-xs font-black text-white font-heading group-hover:text-orange-300 transition-colors">
+                  Exploitation de texte 2
+                </span>
+              </div>
+              <p className="text-[11px] text-emerald-200 font-medium">
+                Grammaire et Conjugaison
+              </p>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Banner Photo: High School Students Studying Together */}
       <div className="relative rounded-2xl overflow-hidden border border-slate-200/80 shadow-md bg-slate-900 group">
         <img
@@ -143,27 +217,47 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
       </div>
 
-      {/* Footer Banner - Designer Credit */}
-      <div 
-        onClick={onOpenDesignerInfo}
-        className="w-full bg-gradient-to-r from-orange-500 via-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white p-3.5 rounded-2xl shadow-md border border-orange-400/30 flex items-center justify-between gap-3 cursor-pointer active:scale-[0.98] transition-all"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0 border border-white/30">
-            <ShieldCheck className="w-6 h-6 text-white" />
+      {/* Footer Section: Designer Credit + Logout Button */}
+      <div className="space-y-2">
+        <div 
+          onClick={onOpenDesignerInfo}
+          className="w-full bg-gradient-to-r from-orange-500 via-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white p-3.5 rounded-2xl shadow-md border border-orange-400/30 flex items-center justify-between gap-3 cursor-pointer active:scale-[0.98] transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0 border border-white/30">
+              <ShieldCheck className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="text-xs font-black tracking-tight font-heading leading-tight">
+                Conçu par Jean Cyrille Ahoret
+              </p>
+              <p className="text-[11px] text-orange-100 font-semibold flex items-center gap-1 mt-0.5">
+                <PhoneCall className="w-3 h-3 text-yellow-200" />
+                <span>Contact : 2250704002387</span>
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-xs font-black tracking-tight font-heading leading-tight">
-              Conçu par Jean Cyrille Ahoret
-            </p>
-            <p className="text-[11px] text-orange-100 font-semibold flex items-center gap-1 mt-0.5">
-              <PhoneCall className="w-3 h-3 text-yellow-200" />
-              <span>Contact : 2250704002387</span>
-            </p>
-          </div>
+          <ChevronRight className="w-5 h-5 text-white shrink-0" />
         </div>
-        <ChevronRight className="w-5 h-5 text-white shrink-0" />
+
+        {/* Déconnexion Icon Button directly below 'Conçu par Jean Cyrille Ahoret' */}
+        <button
+          onClick={() => setShowLogoutModal(true)}
+          className="w-full bg-white hover:bg-red-50 text-red-600 hover:text-red-700 border border-red-200/90 rounded-2xl p-3 shadow-xs flex items-center justify-center gap-2 font-black text-xs uppercase tracking-wider transition-all active:scale-[0.98] cursor-pointer font-heading"
+        >
+          <LogOut className="w-4 h-4 stroke-[2.5]" />
+          <span>Déconnexion</span>
+        </button>
       </div>
+
+      {/* Logout Dialog */}
+      {showLogoutModal && (
+        <LogoutModal
+          onClose={() => setShowLogoutModal(false)}
+          onSaveAndQuit={handleSaveAndQuit}
+          onQuitWithoutSave={handleQuitWithoutSave}
+        />
+      )}
     </div>
   );
 };

@@ -36,6 +36,47 @@ export const LEARNING_MODES: { title: LearningMode; icon: string; description: s
   { title: 'Infos concepteur', icon: 'ℹ️', description: 'Contact & Présentation de l\'auteur' }
 ];
 
+export const isPhiloGrade = (grade: string): boolean => {
+  if (!grade) return false;
+  return grade.startsWith('1ère') || grade.startsWith('Terminale');
+};
+
+export const isPrimaryFrenchGrade = (grade: string): boolean => {
+  return grade === 'CM1' || grade === 'CM2';
+};
+
+export const PRIMARY_FRENCH_LESSONS = [
+  {
+    id: 'exploitation_1',
+    title: 'Exploitation de texte 1',
+    subtitle: 'Vocabulaire et Orthographe',
+    fullName: 'Exploitation de texte 1 (Vocabulaire et Orthographe)',
+    description: 'Vocabulaire, mots de la même famille, synonymes, antonymes, règles d\'orthographe et dictée.',
+    icon: '📖',
+    bgColor: 'bg-emerald-50',
+    borderColor: 'border-emerald-200',
+    textColor: 'text-emerald-800'
+  },
+  {
+    id: 'exploitation_2',
+    title: 'Exploitation de texte 2',
+    subtitle: 'Grammaire et Conjugaison',
+    fullName: 'Exploitation de texte 2 (Grammaire et Conjugaison)',
+    description: 'Analyse grammaticale, types et formes de phrases, accord du sujet-verbe et conjugaison des temps.',
+    icon: '✍️',
+    bgColor: 'bg-blue-50',
+    borderColor: 'border-blue-200',
+    textColor: 'text-blue-800'
+  }
+];
+
+export const getSubjectsForGrade = (grade: string): SubjectItem[] => {
+  if (isPhiloGrade(grade)) {
+    return SUBJECTS_LIST;
+  }
+  return SUBJECTS_LIST.filter((subject) => subject.id !== 'philo' && subject.name !== 'Philosophie');
+};
+
 export const SUBJECTS_LIST: SubjectItem[] = [
   { id: 'philo', name: 'Philosophie', iconName: 'Brain', color: '#D97706', bgColor: '#FEF3C7', category: 'litteraire' },
   { id: 'francais', name: 'Français', iconName: 'BookOpen', color: '#059669', bgColor: '#D1FAE5', category: 'litteraire' },

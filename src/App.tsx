@@ -12,6 +12,7 @@ import { CounselorView } from './components/CounselorView';
 import { DesignerInfoModal } from './components/DesignerInfoModal';
 import { BottomNav, TabType } from './components/BottomNav';
 import { LearningMode } from './types';
+import { isPhiloGrade } from './constants/data';
 
 export default function App() {
   const [selectedGrade, setSelectedGrade] = useState<string>("3ème");
@@ -26,6 +27,13 @@ export default function App() {
   const [showModeModal, setShowModeModal] = useState<boolean>(false);
   const [showSubjectModal, setShowSubjectModal] = useState<boolean>(false);
   const [showDesignerModal, setShowDesignerModal] = useState<boolean>(false);
+
+  const handleSelectGrade = (g: string) => {
+    setSelectedGrade(g);
+    if (selectedSubject === 'Philosophie' && !isPhiloGrade(g)) {
+      setSelectedSubject('Français');
+    }
+  };
 
   const handleSelectMode = (mode: LearningMode) => {
     setSelectedMode(mode);
@@ -129,7 +137,7 @@ export default function App() {
       {showGradeModal && (
         <NiveauScolaireModal
           selectedGrade={selectedGrade}
-          onSelectGrade={(g) => setSelectedGrade(g)}
+          onSelectGrade={handleSelectGrade}
           onClose={() => setShowGradeModal(false)}
         />
       )}
@@ -145,6 +153,7 @@ export default function App() {
       {showSubjectModal && (
         <MatieresView
           selectedSubject={selectedSubject}
+          selectedGrade={selectedGrade}
           onSelectSubject={(s) => {
             setSelectedSubject(s);
             setActiveView('chat');

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Paperclip, X, Bot, User, Sparkles, Volume2, Copy, Check, RefreshCw, FileText, ArrowLeft } from 'lucide-react';
 import { ChatMessage, LearningMode } from '../types';
+import { isPrimaryFrenchGrade } from '../constants/data';
 
 interface ChatViewProps {
   selectedGrade: string;
@@ -38,11 +39,16 @@ export const ChatView: React.FC<ChatViewProps> = ({
   // Welcome message initialization
   useEffect(() => {
     if (messages.length === 0) {
+      const isPrimaryFrench = isPrimaryFrenchGrade(selectedGrade) && selectedSubject === 'Français';
+      const welcomeText = isPrimaryFrench
+        ? `Bonjour ! Je suis votre assistant pédagogique **Ivoir'Educ PRO**.\n\nVous étudiez en **${selectedGrade}** en **Français** (Mode: **${selectedMode}**).\n\nEn **${selectedGrade}**, le programme officiel MENA s'articule autour de deux domaines principaux :\n- 📖 **Exploitation de texte 1** : Vocabulaire et Orthographe\n- ✍️ **Exploitation de texte 2** : Grammaire et Conjugaison\n\nSur quel volet souhaitez-vous travailler aujourd'hui ?`
+        : `Bonjour ! Je suis votre assistant pédagogique **Ivoir'Educ PRO**.\n\nVous étudiez actuellement en **${selectedGrade}** en **${selectedSubject}** (Mode: **${selectedMode}**).\n\nComment puis-je vous aider aujourd'hui ? Vous pouvez me poser une question, m'envoyer la photo d'un exercice ou demander une fiche de révision !`;
+
       setMessages([
         {
           id: 'welcome-1',
           role: 'model',
-          text: `Bonjour ! Je suis votre assistant pédagagique **Ivoir'Educ PRO**.\n\nVous étudiez actuellement en **${selectedGrade}** en **${selectedSubject}** (Mode: **${selectedMode}**).\n\nComment puis-je vous aider aujourd'hui ? Vous pouvez me poser une question, m'envoyer la photo d'un exercice ou demander une fiche de révision !`,
+          text: welcomeText,
           timestamp: Date.now(),
         },
       ]);
@@ -233,18 +239,37 @@ export const ChatView: React.FC<ChatViewProps> = ({
           <Sparkles className="w-3.5 h-3.5 text-orange-500" />
           Raccourcis :
         </span>
-        <button
-          onClick={() => handleSend(`Propose-moi un exercice type examen de ${selectedSubject} pour la classe de ${selectedGrade} avec correction.`)}
-          className="text-xs bg-white text-slate-700 hover:text-emerald-700 border border-slate-200 px-2.5 py-1 rounded-full shrink-0 font-medium hover:border-emerald-300 transition-all shadow-2xs"
-        >
-          📝 Générer un sujet d'exercice
-        </button>
-        <button
-          onClick={() => handleSend(`Fais-moi une fiche de révision complète sur le chapitre principal de ${selectedSubject} en ${selectedGrade}.`)}
-          className="text-xs bg-white text-slate-700 hover:text-emerald-700 border border-slate-200 px-2.5 py-1 rounded-full shrink-0 font-medium hover:border-emerald-300 transition-all shadow-2xs"
-        >
-          📑 Fiche de révision du chapitre
-        </button>
+        {isPrimaryFrenchGrade(selectedGrade) && selectedSubject === 'Français' ? (
+          <>
+            <button
+              onClick={() => handleSend(`Exploitation de texte 1 (Vocabulaire et Orthographe) : Donne-moi une leçon claire et un exercice pratique avec corrigé pour la classe de ${selectedGrade}.`)}
+              className="text-xs bg-emerald-600 text-white hover:bg-emerald-700 px-3 py-1 rounded-full shrink-0 font-bold transition-all shadow-xs flex items-center gap-1"
+            >
+              📖 Exploitation de texte 1 (Vocabulaire & Orthographe)
+            </button>
+            <button
+              onClick={() => handleSend(`Exploitation de texte 2 (Grammaire et Conjugaison) : Donne-moi une leçon claire et un exercice pratique avec corrigé pour la classe de ${selectedGrade}.`)}
+              className="text-xs bg-blue-600 text-white hover:bg-blue-700 px-3 py-1 rounded-full shrink-0 font-bold transition-all shadow-xs flex items-center gap-1"
+            >
+              ✍️ Exploitation de texte 2 (Grammaire & Conjugaison)
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={() => handleSend(`Propose-moi un exercice type examen de ${selectedSubject} pour la classe de ${selectedGrade} avec correction.`)}
+              className="text-xs bg-white text-slate-700 hover:text-emerald-700 border border-slate-200 px-2.5 py-1 rounded-full shrink-0 font-medium hover:border-emerald-300 transition-all shadow-2xs"
+            >
+              📝 Générer un sujet d'exercice
+            </button>
+            <button
+              onClick={() => handleSend(`Fais-moi une fiche de révision complète sur le chapitre principal de ${selectedSubject} en ${selectedGrade}.`)}
+              className="text-xs bg-white text-slate-700 hover:text-emerald-700 border border-slate-200 px-2.5 py-1 rounded-full shrink-0 font-medium hover:border-emerald-300 transition-all shadow-2xs"
+            >
+              📑 Fiche de révision du chapitre
+            </button>
+          </>
+        )}
       </div>
 
       {/* Message History */}
