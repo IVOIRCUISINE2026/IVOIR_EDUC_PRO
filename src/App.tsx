@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { WelcomeScreen } from './components/WelcomeScreen';
 import { Header } from './components/Header';
 import { HomeScreen } from './components/HomeScreen';
 import { NiveauScolaireModal } from './components/NiveauScolaireModal';
@@ -15,6 +16,8 @@ import { LearningMode } from './types';
 import { isPhiloGrade } from './constants/data';
 
 export default function App() {
+  const [showWelcomeScreen, setShowWelcomeScreen] = useState<boolean>(true);
+
   const [selectedGrade, setSelectedGrade] = useState<string>("3ème");
   const [selectedSubject, setSelectedSubject] = useState<string>("Mathématiques");
   const [selectedMode, setSelectedMode] = useState<LearningMode>("Interrogations et devoirs");
@@ -34,6 +37,25 @@ export default function App() {
       setSelectedSubject('Français');
     }
   };
+
+  const handleLogoutAndSave = () => {
+    localStorage.setItem('ivoireduc_saved_grade', selectedGrade);
+    localStorage.setItem('ivoireduc_saved_subject', selectedSubject);
+    localStorage.setItem('ivoireduc_last_logout', new Date().toISOString());
+    setActiveView('home');
+    setActiveTab('accueil');
+    setShowWelcomeScreen(true);
+  };
+
+  const handleLogoutWithoutSave = () => {
+    setActiveView('home');
+    setActiveTab('accueil');
+    setShowWelcomeScreen(true);
+  };
+
+  if (showWelcomeScreen) {
+    return <WelcomeScreen onEnterApp={() => setShowWelcomeScreen(false)} />;
+  }
 
   const handleSelectMode = (mode: LearningMode) => {
     setSelectedMode(mode);
@@ -89,6 +111,8 @@ export default function App() {
             onOpenSubjectSelect={() => setShowSubjectModal(true)}
             onStartChat={() => setActiveView('chat')}
             onOpenDesignerInfo={() => setShowDesignerModal(true)}
+            onLogoutAndSave={handleLogoutAndSave}
+            onLogoutWithoutSave={handleLogoutWithoutSave}
           />
         )}
 
