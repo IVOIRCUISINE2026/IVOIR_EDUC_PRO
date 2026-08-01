@@ -6,6 +6,7 @@ export type LearningMode =
   | 'Correction des évaluations'
   | 'Historique des évaluations'
   | 'Fiches de révisions'
+  | 'Ressources hors-ligne'
   | 'Cours en vidéos'
   | 'Examens blancs'
   | 'Tableau de bord'

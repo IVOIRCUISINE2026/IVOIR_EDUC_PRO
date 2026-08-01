@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { GraduationCap, BookOpen, Layers, ChevronRight, ShieldCheck, PhoneCall, Sparkles, LogOut, Calendar, Clock } from 'lucide-react';
+import React, { useState } from 'react';
+import { GraduationCap, BookOpen, Layers, ChevronRight, ShieldCheck, PhoneCall, Sparkles, LogOut } from 'lucide-react';
 import { LearningMode } from '../types';
 import { LogoutModal } from './LogoutModal';
 
@@ -29,25 +29,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onLogoutWithoutSave,
 }) => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const formattedDate = currentTime.toLocaleDateString('fr-FR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-
-  const formattedTime = currentTime.toLocaleTimeString('fr-FR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
 
   const handleSaveAndQuit = () => {
     if (onLogoutAndSave) {
@@ -69,20 +50,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
   return (
     <div className="space-y-4 pb-20 max-w-2xl mx-auto px-4 pt-3">
-      {/* Top Highlighted Date & Time Banner */}
-      <div className="w-full flex justify-center pb-1">
-        <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-600 text-white px-4 py-2 rounded-2xl shadow-md border border-orange-300/40 flex items-center justify-between w-full font-heading">
-          <div className="flex items-center gap-2 text-xs sm:text-sm font-black capitalize">
-            <Calendar className="w-4 h-4 text-amber-200 shrink-0" />
-            <span>{formattedDate}</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-xs sm:text-sm font-black bg-white/20 px-2.5 py-1 rounded-xl backdrop-blur-xs font-mono tracking-wider text-amber-100">
-            <Clock className="w-3.5 h-3.5 text-amber-200 shrink-0" />
-            <span>{formattedTime}</span>
-          </div>
-        </div>
-      </div>
-
       {/* Quick Launch Active Configuration Banner if set */}
       <div className="bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 text-white rounded-2xl p-3.5 shadow-md flex items-center justify-between gap-3">
         <div className="min-w-0 flex-1">

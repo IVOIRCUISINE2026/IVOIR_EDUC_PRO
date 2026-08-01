@@ -9,9 +9,7 @@ export const GRADES_LIST = [
   "3ème",
   "2nde A",
   "2nde C",
-  "2nde D",
-  "1ère A1",
-  "1ère A2",
+  "1ère A",
   "1ère C",
   "1ère D",
   "Terminale A1",
@@ -26,6 +24,7 @@ export const LEARNING_MODES: { title: LearningMode; icon: string; description: s
   { title: 'Correction des évaluations', icon: '✏️', description: 'Corrigés détaillés pas à pas' },
   { title: 'Historique des évaluations', icon: '🕒', description: 'Vos anciennes épreuves révisées' },
   { title: 'Fiches de révisions', icon: '📑', description: 'Synthèses de cours et formules clés' },
+  { title: 'Ressources hors-ligne', icon: '💾', description: 'Consulter les cours & fiches sans connexion', badge: 'Nouveau' },
   { title: 'Cours en vidéos', icon: '🎥', description: 'Explications vidéo par des enseignants' },
   { title: 'Examens blancs', icon: '📋', description: 'Sujets officiels CEPE, BEPC et BAC' },
   { title: 'Tableau de bord', icon: '📊', description: 'Suivi de vos progrès et statistiques' },
@@ -115,7 +114,7 @@ export const SAMPLE_VIDEOS: VideoCourse[] = [
     id: 'v3',
     title: 'Français - La Méthodologie de la Dissertation',
     subject: 'Français',
-    grade: '1ère A1',
+    grade: '1ère A',
     duration: '22 min',
     youtubeId: 'dQw4w9WgXcQ',
     thumbnailUrl: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&auto=format&fit=crop&q=80',
@@ -181,6 +180,15 @@ export const MENA_COEFFICIENTS: Record<string, GradeSubjectCoefficient[]> = {
     { subject: "EDHC", coef: 1 },
     { subject: "Espagnol / Allemand", coef: 1 }
   ],
+  "2nde A": [
+    { subject: "Français", coef: 4 },
+    { subject: "Histoire-géographie", coef: 3 },
+    { subject: "Anglais", coef: 3 },
+    { subject: "Espagnol / Allemand", coef: 3 },
+    { subject: "Mathématiques", coef: 2 },
+    { subject: "SVT", coef: 2 },
+    { subject: "Physique-chimie", coef: 2 }
+  ],
   "2nde C": [
     { subject: "Mathématiques", coef: 4 },
     { subject: "Physique-chimie", coef: 4 },
@@ -188,6 +196,23 @@ export const MENA_COEFFICIENTS: Record<string, GradeSubjectCoefficient[]> = {
     { subject: "Français", coef: 3 },
     { subject: "Histoire-géographie", coef: 2 },
     { subject: "Anglais", coef: 2 }
+  ],
+  "1ère A": [
+    { subject: "Français", coef: 5 },
+    { subject: "Histoire-géographie", coef: 4 },
+    { subject: "Anglais", coef: 4 },
+    { subject: "Espagnol / Allemand", coef: 3 },
+    { subject: "Philosophie", coef: 3 },
+    { subject: "Mathématiques", coef: 2 }
+  ],
+  "1ère C": [
+    { subject: "Mathématiques", coef: 5 },
+    { subject: "Physique-chimie", coef: 5 },
+    { subject: "SVT", coef: 3 },
+    { subject: "Français", coef: 3 },
+    { subject: "Histoire-géographie", coef: 2 },
+    { subject: "Anglais", coef: 2 },
+    { subject: "Philosophie", coef: 2 }
   ],
   "1ère D": [
     { subject: "SVT", coef: 4 },

@@ -1,16 +1,17 @@
 import React from 'react';
-import { ArrowLeft, UserCheck, MessageSquare, PhoneCall, HelpCircle, Compass, Target } from 'lucide-react';
+import { ArrowLeft, UserCheck, MessageSquare, PhoneCall, HelpCircle, Compass, Target, Archive } from 'lucide-react';
 
 interface CounselorViewProps {
   onBack: () => void;
   onStartCounselorChat: (topic: string) => void;
+  onViewHistory?: () => void;
 }
 
-export const CounselorView: React.FC<CounselorViewProps> = ({ onBack, onStartCounselorChat }) => {
+export const CounselorView: React.FC<CounselorViewProps> = ({ onBack, onStartCounselorChat, onViewHistory }) => {
   const topics = [
     {
       title: 'Orientation Post-3ème ou Post-BAC',
-      description: 'Choix entre 2nde A, C, D ou filières universitaires',
+      description: 'Choix entre 2nde A, C ou 1ère A, C, D ou filières universitaires',
       icon: Compass,
       color: 'bg-blue-50 text-blue-700 border-blue-200',
     },
@@ -49,10 +50,21 @@ export const CounselorView: React.FC<CounselorViewProps> = ({ onBack, onStartCou
       </div>
 
       {/* Hero Banner */}
-      <div className="bg-gradient-to-r from-emerald-800 to-teal-900 text-white rounded-2xl p-5 shadow-lg space-y-2">
-        <div className="flex items-center gap-2">
-          <UserCheck className="w-6 h-6 text-yellow-300" />
-          <h3 className="text-base font-black font-heading">Espace Conseil personnalisé</h3>
+      <div className="bg-gradient-to-r from-emerald-800 to-teal-900 text-white rounded-2xl p-5 shadow-lg space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <UserCheck className="w-6 h-6 text-yellow-300" />
+            <h3 className="text-base font-black font-heading">Espace Conseil personnalisé</h3>
+          </div>
+          {onViewHistory && (
+            <button
+              onClick={onViewHistory}
+              className="bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-white/20 cursor-pointer"
+            >
+              <Archive className="w-3.5 h-3.5 text-amber-300" />
+              <span>Historique Archivé</span>
+            </button>
+          )}
         </div>
         <p className="text-xs text-emerald-100 leading-relaxed">
           Posez vos questions d'orientation, demandez de l'aide pour votre méthode de travail ou discutez de vos ambitions académiques avec notre Conseiller IA certifié.

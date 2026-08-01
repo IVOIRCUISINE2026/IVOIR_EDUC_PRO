@@ -1,7 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Paperclip, X, Bot, User, Sparkles, Volume2, Copy, Check, RefreshCw, FileText, ArrowLeft } from 'lucide-react';
+import { Send, Paperclip, X, Bot, User, Sparkles, Volume2, Copy, Check, RefreshCw, FileText, ArrowLeft, Archive, Download } from 'lucide-react';
 import { ChatMessage, LearningMode } from '../types';
 import { isPrimaryFrenchGrade } from '../constants/data';
+import { AssessmentTimer, AssessmentType } from './AssessmentTimer';
+import { ExamOptionsWidget, ExamType } from './ExamOptionsWidget';
+import { addEvaluationToHistory, addCounselorToHistory } from '../utils/historyStorage';
+import { generateDocumentPdf } from '../utils/pdfExporter';
+import { saveResourceToCache } from '../utils/offlineCache';
 
 interface ChatViewProps {
   selectedGrade: string;
@@ -28,9 +33,40 @@ export const ChatView: React.FC<ChatViewProps> = ({
   const [attachedFile, setAttachedFile] = useState<{ name: string; data: string; mimeType: string } | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [speakingId, setSpeakingId] = useState<string | null>(null);
+  const [archiveToast, setArchiveToast] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleArchiveSession = () => {
+    const lastMsgText = messages.length > 1 ? messages[messages.length - 1].text : '';
+    const cleanSnippet = lastMsgText.replace(/[*#_`]/g, '').substring(0, 160);
+
+    if (selectedMode === 'Parler à un Conseiller Pédagogique' || selectedMode === 'Historique Conseiller') {
+      addCounselorToHistory({
+        topic: `Conseil d'orientation & Méthodologie (${selectedGrade})`,
+        grade: selectedGrade,
+        counselorName: 'Conseiller Pédagogique MENA',
+        summary: cleanSnippet || `Session de conseil et d'orientation pour la classe de ${selectedGrade}.`,
+        recommendations: [
+          'Établir un planning de révision régulier.',
+          'Consulter les fiches de synthèse de chaque matière.'
+        ]
+      });
+      setArchiveToast('✅ Session archivée dans l\'Historique Conseiller !');
+    } else {
+      addEvaluationToHistory({
+        title: `${selectedMode} : ${selectedSubject} (${selectedGrade})`,
+        type: selectedMode === 'Interrogations et devoirs' ? 'devoir' : 'quiz',
+        subject: selectedSubject,
+        grade: selectedGrade,
+        summary: cleanSnippet || `Session d'entraînement et d'évaluation en ${selectedSubject}.`,
+        score: 'Note à venir'
+      });
+      setArchiveToast('✅ Évaluation archivée dans votre Historique !');
+    }
+    setTimeout(() => setArchiveToast(null), 3000);
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -198,6 +234,61 @@ export const ChatView: React.FC<ChatViewProps> = ({
     }
   };
 
+  const handleDownloadMessagePdf = (msg: ChatMessage) => {
+    let docType: 'cours' | 'interrogation' | 'devoir' | 'examen' | 'fiche' = 'cours';
+    if (selectedMode === 'Interrogations et devoirs') docType = 'interrogation';
+    if (selectedMode === 'Examens blancs') docType = 'examen';
+    if (selectedMode === 'Fiches de révisions') docType = 'fiche';
+
+    // Auto-save resource to offline cache
+    saveResourceToCache({
+      title: `${selectedMode} : ${selectedSubject}`,
+      subtitle: `Sujet / Support rédigé pour la classe de ${selectedGrade}`,
+      type: docType,
+      subject: selectedSubject,
+      grade: selectedGrade,
+      content: msg.text,
+    });
+
+    generateDocumentPdf({
+      title: `${selectedMode} : ${selectedSubject}`,
+      subtitle: `Sujet / Support rédigé pour la classe de ${selectedGrade}`,
+      subject: selectedSubject,
+      grade: selectedGrade,
+      docType: docType,
+      content: msg.text,
+    });
+  };
+
+  const handleDownloadSessionPdf = () => {
+    const fullSessionText = messages
+      .map(m => `${m.role === 'user' ? 'ÉLÈVE' : 'ASSISTANT IVOIREDUC'} :\n${m.text}`)
+      .join('\n\n--------------------------------------------------\n\n');
+
+    let docType: 'cours' | 'interrogation' | 'devoir' | 'examen' | 'fiche' = 'cours';
+    if (selectedMode === 'Interrogations et devoirs') docType = 'interrogation';
+    if (selectedMode === 'Examens blancs') docType = 'examen';
+
+    // Auto-save session to offline cache
+    saveResourceToCache({
+      title: `Séance Complète : ${selectedSubject} (${selectedMode})`,
+      subtitle: `Séance complète de révision/cours (${selectedGrade})`,
+      type: docType,
+      subject: selectedSubject,
+      grade: selectedGrade,
+      content: fullSessionText,
+    });
+
+    generateDocumentPdf({
+      title: `Séance Complète - ${selectedSubject}`,
+      subtitle: `Mode : ${selectedMode} | Niveau : ${selectedGrade}`,
+      subject: selectedSubject,
+      grade: selectedGrade,
+      docType: 'cours',
+      content: fullSessionText,
+    });
+  };
+
   return (
     <div className="flex flex-col h-full bg-slate-50 max-w-2xl mx-auto shadow-sm">
       {/* Top Session Header */}
@@ -210,7 +301,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
           <ArrowLeft className="w-5 h-5" />
         </button>
 
-        {/* Selected Params Pill Controls */}
+        {/* Selected Params Pill Controls & Archive Button */}
         <div className="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none min-w-0">
           <button
             onClick={onOpenGradeModal}
@@ -230,8 +321,80 @@ export const ChatView: React.FC<ChatViewProps> = ({
           >
             ⚙️ {selectedMode}
           </button>
+
+          <button
+            onClick={handleDownloadSessionPdf}
+            className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-extrabold px-2.5 py-1 rounded-lg shrink-0 transition-all flex items-center gap-1 cursor-pointer active:scale-95 shadow-2xs"
+            title="Télécharger toute la séance au format PDF"
+          >
+            <Download className="w-3.5 h-3.5 text-yellow-300" />
+            <span className="hidden sm:inline">PDF Séances</span>
+          </button>
+
+          <button
+            onClick={handleArchiveSession}
+            className="bg-slate-800 hover:bg-slate-900 text-white text-xs font-extrabold px-2.5 py-1 rounded-lg shrink-0 transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+            title="Archiver cette session dans l'historique permanent"
+          >
+            <Archive className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden sm:inline">Archiver</span>
+          </button>
         </div>
       </div>
+
+      {/* Archive Toast Alert */}
+      {archiveToast && (
+        <div className="bg-emerald-700 text-white text-xs font-black px-4 py-2.5 text-center shadow-md animate-in slide-in-from-top duration-200 flex items-center justify-center gap-2">
+          <span>{archiveToast}</span>
+        </div>
+      )}
+
+      {/* Assessment Timer Widget (Interrogations 15 min / Devoirs 45 min) */}
+      {selectedMode === 'Interrogations et devoirs' && (
+        <div className="px-4 pt-3 pb-1 border-b border-slate-200/80 bg-slate-100/70">
+          <AssessmentTimer
+            selectedGrade={selectedGrade}
+            selectedSubject={selectedSubject}
+            onStartAssessment={(type, durationMinutes, promptText) => {
+              handleSend(promptText);
+            }}
+            onTimeExpired={(type) => {
+              addEvaluationToHistory({
+                title: `${type === 'interrogation' ? 'Interrogation Écrite (15 min)' : 'Devoir de Synthèse (45 min)'} - ${selectedSubject}`,
+                type: type,
+                subject: selectedSubject,
+                grade: selectedGrade,
+                summary: `Épreuve chronométrée terminée. Réponses soumises pour évaluation et correction.`,
+                durationMinutes: type === 'interrogation' ? 15 : 45,
+                score: '15 / 20'
+              });
+              handleSend(
+                `⏱️ LE TEMPS EST ÉCOULÉ (Fin des ${type === 'interrogation' ? '15' : '45'} minutes) !\nMerci d'évaluer les réponses fournies ci-dessus, d'attribuer une note précise sur 20 et de fournir le corrigé détaillé.`
+              );
+            }}
+          />
+        </div>
+      )}
+
+      {/* Exam Options Widget (CEPE, BEPC, BAC) */}
+      {selectedMode === 'Examens blancs' && (
+        <div className="px-4 pt-3 pb-1 border-b border-slate-200/80 bg-slate-100/70">
+          <ExamOptionsWidget
+            selectedGrade={selectedGrade}
+            selectedSubject={selectedSubject}
+            onSelectExam={(exam, promptText) => {
+              addEvaluationToHistory({
+                title: `Examen Blanc ${exam} - ${selectedSubject}`,
+                type: 'examen',
+                subject: selectedSubject,
+                grade: selectedGrade,
+                summary: `Épreuve officielle d'examen blanc de ${exam} générée et en cours de traitement.`
+              });
+              handleSend(promptText);
+            }}
+          />
+        </div>
+      )}
 
       {/* Suggested Quick Prompts */}
       <div className="bg-emerald-800/5 border-b border-emerald-100 px-4 py-2 flex items-center gap-2 overflow-x-auto scrollbar-none shrink-0">
@@ -307,17 +470,25 @@ export const ChatView: React.FC<ChatViewProps> = ({
                 </div>
 
                 {!isUser && msg.text && (
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-1 text-slate-400">
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-1.5 text-slate-400">
+                    <button
+                      onClick={() => handleDownloadMessagePdf(msg)}
+                      className="flex items-center gap-1 text-[11px] font-bold text-emerald-800 hover:text-emerald-950 px-2 py-0.5 rounded-md bg-emerald-50 hover:bg-emerald-100 transition-colors border border-emerald-200/80 cursor-pointer"
+                      title="Télécharger ce document/sujet au format PDF"
+                    >
+                      <Download className="w-3.5 h-3.5 text-emerald-700" />
+                      <span>PDF</span>
+                    </button>
                     <button
                       onClick={() => toggleSpeak(msg.text, msg.id)}
-                      className="p-1 hover:text-emerald-600 rounded-md hover:bg-slate-50 transition-colors"
+                      className="p-1 hover:text-emerald-600 rounded-md hover:bg-slate-50 transition-colors cursor-pointer"
                       title="Écouter le message"
                     >
                       <Volume2 className={`w-4 h-4 ${speakingId === msg.id ? 'text-emerald-600 animate-pulse' : ''}`} />
                     </button>
                     <button
                       onClick={() => copyToClipboard(msg.text, msg.id)}
-                      className="p-1 hover:text-emerald-600 rounded-md hover:bg-slate-50 transition-colors"
+                      className="p-1 hover:text-emerald-600 rounded-md hover:bg-slate-50 transition-colors cursor-pointer"
                       title="Copier le texte"
                     >
                       {copiedId === msg.id ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
